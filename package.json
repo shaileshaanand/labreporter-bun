@@ -1,0 +1,17 @@
+{
+  "name": "labreporter-bun",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "dev":"bun run --watch src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "elysia": "^0.8.9"
+  }
+}

@@ -1,0 +1,12 @@
+version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/home/bun/app
+      - /home/bun/app/node_modules
+    ports:
+      - 3000:3000
+    command: bun run dev
