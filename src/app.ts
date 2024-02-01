@@ -1,6 +1,7 @@
-import { Elysia } from 'elysia'
+import { Elysia } from "elysia";
 
-const app = new Elysia()
-	.get('/', () => 'Hello Elysia!')
+const app = new Elysia().get("/", () => {
+  return "Hello Elysia!";
+});
 
-    export default app
+export default app;

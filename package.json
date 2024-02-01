@@ -3,9 +3,12 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "dev":"bun run --watch src/index.ts"
+    "dev": "bun run --watch src/index.ts",
+    "lint": "bunx @biomejs/biome check .",
+    "lint:fix": "bunx @biomejs/biome check . --apply"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.5.3",
     "@types/bun": "latest"
   },
   "peerDependencies": {
