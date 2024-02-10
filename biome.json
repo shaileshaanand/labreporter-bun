@@ -20,5 +20,19 @@
     "lineWidth": 80,
     "lineEnding": "lf",
     "ignore": []
-  }
+  },
+  "overrides": [
+    {
+      "include": [
+        "tests/*.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
 }
