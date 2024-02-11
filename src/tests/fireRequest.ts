@@ -13,6 +13,11 @@ const fireRequest = async (
     new Request(`http://localhost${path}`, {
       ...params,
       body: JSON.stringify(params.body),
+      headers: params.body
+        ? {
+            "Content-Type": "application/json",
+          }
+        : undefined,
     }),
   );
   const jsonData = (await response.json()) as any;

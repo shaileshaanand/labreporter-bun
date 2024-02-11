@@ -9,6 +9,9 @@
       "recommended": true,
       "correctness": {
         "noUnusedVariables": "error"
+      },
+      "suspicious": {
+        "noConsoleLog": "warn"
       }
     }
   },
@@ -23,9 +26,7 @@
   },
   "overrides": [
     {
-      "include": [
-        "tests/*.ts"
-      ],
+      "include": ["tests/*.ts"],
       "linter": {
         "rules": {
           "suspicious": {

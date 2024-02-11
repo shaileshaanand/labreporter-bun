@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import context from "../context";
-import { doctors } from "../db/schema";
 import db from "../context/db";
+import { doctors } from "../db/schema";
 
 const doctorsController = new Elysia({ prefix: "/doctor" })
   .use(context)
@@ -26,11 +26,10 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   })
   .post(
     "/",
-    async ({ body }) => {
-      const createdDoctor = (
-        await db.insert(doctors).values(body).returning()
-      )[0];
+    async ({ body, set }) => {
+      const [createdDoctor] = await db.insert(doctors).values(body).returning();
       const { deleted: _, ...doctor } = createdDoctor;
+      set.status = 201;
       return doctor;
     },
     {

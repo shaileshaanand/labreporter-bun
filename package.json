@@ -19,7 +19,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@elysiajs/eden": "^0.8.1",
     "@elysiajs/swagger": "^0.8.5",
     "@libsql/client": "^0.4.3",
     "@t3-oss/env-core": "^0.8.0",

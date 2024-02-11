@@ -11,10 +11,12 @@ const libsqlClient = createClient({
 
 const db = drizzle(libsqlClient);
 
+// biome-ignore lint/suspicious/noConsoleLog: needs logging
 console.log("Running Migrations...");
 
 await migrate(db, { migrationsFolder: "src/db/migrations" });
 
+// biome-ignore lint/suspicious/noConsoleLog: needs logging
 console.log("Done.");
 
 libsqlClient.close();
