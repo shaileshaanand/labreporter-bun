@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import context from "../context";
 import { doctors } from "../db/schema";
+import db from "../context/db";
 
 const doctorsController = new Elysia({ prefix: "/doctor" })
   .use(context)
@@ -12,7 +13,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
       email: t.String(),
     }),
   })
-  .get("/", async ({ db }) => {
+  .get("/", async () => {
     const doctorsList = await db.query.doctors.findMany({
       columns: {
         deleted: false,
@@ -25,7 +26,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   })
   .post(
     "/",
-    async ({ db, body }) => {
+    async ({ body }) => {
       const createdDoctor = (
         await db.insert(doctors).values(body).returning()
       )[0];
@@ -38,7 +39,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   )
   .get(
     "/:id",
-    async ({ db, params: { id } }) => {
+    async ({ params: { id } }) => {
       const doctor = await db.query.doctors.findFirst({
         with: {
           id,
@@ -61,7 +62,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   )
   .put(
     "/:id",
-    async ({ db, body, params: { id } }) => {
+    async ({ body, params: { id } }) => {
       const updatedDoctor = await db
         .update(doctors)
         .set(body)
@@ -76,7 +77,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   )
   .delete(
     "/:id",
-    async ({ db, params: { id }, set }) => {
+    async ({ params: { id }, set }) => {
       const deletedDoctor = await db
         .update(doctors)
         .set({ deleted: true })
