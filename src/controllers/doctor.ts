@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
+import { z } from "zod";
 import context from "../context";
 import db from "../context/db";
 import { doctors } from "../db/schema";
-import { z } from "zod";
 import { NotFoundError } from "../errors";
 
 const doctorsController = new Elysia({ prefix: "/doctor" })

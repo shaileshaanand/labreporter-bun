@@ -1,6 +1,6 @@
+import { faker } from "@faker-js/faker";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import * as schema from "../db/schema";
-import { faker } from "@faker-js/faker";
 import { generatePhoneNumber } from "./helpers";
 
 export const doctorFactory = async (

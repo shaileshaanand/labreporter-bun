@@ -6,9 +6,9 @@ import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import app from "../app";
 import * as schema from "../db/schema";
+import { doctorFactory } from "./factories";
 import fireRequest from "./fireRequest";
 import { generatePhoneNumber } from "./helpers";
-import { doctorFactory } from "./factories";
 
 let db: BunSQLiteDatabase<typeof schema>;
 
