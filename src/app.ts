@@ -6,9 +6,6 @@ import { APIError } from "./errors";
 
 const app = new Elysia()
   .use(swagger())
-  .get("/", () => {
-    return { hello: "world" };
-  })
   .onError(({ error, code, set }) => {
     if (error instanceof ZodError) {
       set.status = 400;
