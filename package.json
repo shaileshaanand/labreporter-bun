@@ -7,7 +7,10 @@
     "lint": "bunx @biomejs/biome check .",
     "lint:fix": "bunx @biomejs/biome check . --apply",
     "makemigrations": "bunx drizzle-kit generate:sqlite",
-    "migrate": "bun run src/db/migrate.ts"
+    "migrate": "bun run src/db/migrate.ts",
+    "test":"bun test && bunx @biomejs/biome check .",
+    "test:coverage":"bun test --coverage",
+    "test:watch":"bun test --watch"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
