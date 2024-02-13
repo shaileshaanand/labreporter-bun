@@ -20,8 +20,12 @@ const fireRequest = async (
         : undefined,
     }),
   );
-  const jsonData = (await response.json()) as any;
-  return [response, jsonData];
+  try {
+    const jsonData = (await response.json()) as any;
+    return [response, jsonData];
+  } catch {
+    return [response, undefined];
+  }
 };
 
 export default fireRequest;

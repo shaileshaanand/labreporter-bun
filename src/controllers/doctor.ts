@@ -3,14 +3,16 @@ import { Elysia, t } from "elysia";
 import context from "../context";
 import db from "../context/db";
 import { doctors } from "../db/schema";
+import { z } from "zod";
+import { NotFoundError } from "../errors";
 
 const doctorsController = new Elysia({ prefix: "/doctor" })
   .use(context)
   .model({
     doctor: t.Object({
       name: t.String(),
-      phone: t.String(),
-      email: t.String(),
+      phone: t.Optional(t.String()),
+      email: t.Optional(t.String()),
     }),
   })
   .get("/", async () => {
@@ -27,7 +29,16 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   .post(
     "/",
     async ({ body, set }) => {
-      const [createdDoctor] = await db.insert(doctors).values(body).returning();
+      const validator = z.object({
+        name: z.string().min(3).max(255),
+        phone: z
+          .string()
+          .regex(/^[6-9]\d{9}$/)
+          .optional(),
+        email: z.string().email().optional(),
+      });
+      const data = validator.parse(body);
+      const [createdDoctor] = await db.insert(doctors).values(data).returning();
       const { deleted: _, ...doctor } = createdDoctor;
       set.status = 201;
       return doctor;
@@ -39,17 +50,14 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   .get(
     "/:id",
     async ({ params: { id } }) => {
-      const doctor = await db.query.doctors.findFirst({
-        with: {
-          id,
-          deleted: false,
-        },
+      const [doctor] = await db.query.doctors.findMany({
+        where: eq(doctors.id, id),
         columns: {
           deleted: false,
         },
       });
       if (doctor === undefined) {
-        throw new Error(`Doctor with id: ${id} not found`);
+        throw new NotFoundError(`Doctor with id: ${id} not found`);
       }
       return doctor;
     },
@@ -62,12 +70,17 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   .put(
     "/:id",
     async ({ body, params: { id } }) => {
-      const updatedDoctor = await db
+      const [updatedDoctor] = await db
         .update(doctors)
         .set(body)
         .where(eq(doctors.id, id))
         .returning();
-      return updatedDoctor;
+      if (updatedDoctor === undefined) {
+        throw new NotFoundError(`Doctor with id: ${id} not found`);
+      }
+      const { deleted: _, ...updatedDoctorFiltered } = updatedDoctor;
+
+      return updatedDoctorFiltered;
     },
     {
       body: "doctor",
@@ -77,7 +90,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
   .delete(
     "/:id",
     async ({ params: { id }, set }) => {
-      const deletedDoctor = await db
+      const [deletedDoctor] = await db
         .update(doctors)
         .set({ deleted: true })
         .where(eq(doctors.id, id))
@@ -85,7 +98,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
       if (deletedDoctor) {
         set.status = 204;
       } else {
-        throw new Error(`Doctor with id: ${id} not found`);
+        throw new NotFoundError(`Doctor with id: ${id} not found`);
       }
     },
     {
