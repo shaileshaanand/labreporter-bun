@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1706815020287,
+      "tag": "0000_groovy_purple_man",
+      "breakpoints": true
+    }
+  ]
+}
