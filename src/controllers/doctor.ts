@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { z } from "zod";
 import context from "../context";
@@ -20,9 +20,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
       columns: {
         deleted: false,
       },
-      with: {
-        deleted: false,
-      },
+      where: eq(doctors.deleted, false),
     });
     return doctorsList;
   })
@@ -51,7 +49,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
     "/:id",
     async ({ params: { id } }) => {
       const [doctor] = await db.query.doctors.findMany({
-        where: eq(doctors.id, id),
+        where: and(eq(doctors.id, id), eq(doctors.deleted, false)),
         columns: {
           deleted: false,
         },
@@ -73,7 +71,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
       const [updatedDoctor] = await db
         .update(doctors)
         .set(body)
-        .where(eq(doctors.id, id))
+        .where(and(eq(doctors.id, id), eq(doctors.deleted, false)))
         .returning();
       if (updatedDoctor === undefined) {
         throw new NotFoundError(`Doctor with id: ${id} not found`);
@@ -93,7 +91,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" })
       const [deletedDoctor] = await db
         .update(doctors)
         .set({ deleted: true })
-        .where(eq(doctors.id, id))
+        .where(and(eq(doctors.id, id), eq(doctors.deleted, false)))
         .returning();
       if (deletedDoctor) {
         set.status = 204;

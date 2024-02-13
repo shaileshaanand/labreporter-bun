@@ -46,6 +46,23 @@ describe("Doctor Tests", () => {
     });
   });
 
+  it("Should not list deleted doctors", async () => {
+    const doctor = await doctorFactory(db);
+    await doctorFactory(db, { deleted: true });
+
+    const [response, data] = await fireRequest(app, "/doctor");
+
+    expect(response.status).toBe(200);
+    expect(data.length).toBe(1);
+
+    const returnedDoctor = data.find((d: any) => d.id === doctor.id);
+
+    expect(returnedDoctor).toBeDefined();
+    expect(returnedDoctor.name).toBe(doctor.name);
+    expect(returnedDoctor.phone).toBe(doctor.phone);
+    expect(returnedDoctor.email).toBe(doctor.email);
+  });
+
   it("Should create a new doctor", async () => {
     const body = {
       name: faker.person.fullName(),
@@ -295,6 +312,15 @@ describe("Doctor Tests", () => {
     expect(response.status).toBe(404);
   });
 
+  it("Should not get a deleted doctor", async () => {
+    const doctor = await doctorFactory(db, { deleted: true });
+
+    const [response, data] = await fireRequest(app, `/doctor/${doctor.id}`);
+
+    expect(response.status).toBe(404);
+    expect(data.errors).toBeDefined();
+  });
+
   it("Should update a doctor", async () => {
     const doctor1 = await doctorFactory(db);
     const doctor2 = await doctorFactory(db);
@@ -358,6 +384,27 @@ describe("Doctor Tests", () => {
     expect(updatedDoctor.deleted).toBe(false);
   });
 
+  it("Should not update a deleted doctor", async () => {
+    const doctor = await doctorFactory(db, { deleted: true });
+    const updatedDoctorPayload = {
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      phone: generatePhoneNumber(),
+    };
+
+    const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
+      method: "PUT",
+      body: updatedDoctorPayload,
+    });
+
+    expect(response.status).toBe(404);
+    const [updatedDoctor] = await db.query.doctors.findMany({
+      where: eq(schema.doctors.id, doctor.id),
+    });
+
+    expect(updatedDoctor.id).toBe(doctor.id);
+  });
+
   it("Should delete a doctor", async () => {
     const doctor = await doctorFactory(db);
 
@@ -394,5 +441,19 @@ describe("Doctor Tests", () => {
     expect(deletedDoctor.email).toBe(doctor.email);
     expect(deletedDoctor.phone).toBe(doctor.phone);
     expect(deletedDoctor.deleted).toBe(false);
+  });
+  it("Should not delete a deleted doctor", async () => {
+    const doctor = await doctorFactory(db, { deleted: true });
+
+    const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
+      method: "DELETE",
+    });
+
+    expect(response.status).toBe(404);
+    const [deletedDoctor] = await db.query.doctors.findMany({
+      where: eq(schema.doctors.id, doctor.id),
+    });
+
+    expect(deletedDoctor.deleted).toBe(true);
   });
 });
