@@ -1,6 +1,5 @@
 import Elysia from "elysia";
-import db from "./db";
 
-const context = new Elysia().decorate("db", db);
+const context = new Elysia();
 
 export default context;
