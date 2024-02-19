@@ -10,3 +10,15 @@ export const doctors = sqliteTable("doctors", {
     () => new Date(),
   ),
 });
+
+export const users = sqliteTable("users", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  firstName: text("firstName", { mode: "text" }).notNull(),
+  lastName: text("lastName", { mode: "text" }),
+  username: text("username", { mode: "text" }).notNull().unique(),
+  passwordHash: text("passwordHash", { mode: "text" }).notNull(),
+  deleted: integer("deleted", { mode: "boolean" }).default(false),
+  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+});
