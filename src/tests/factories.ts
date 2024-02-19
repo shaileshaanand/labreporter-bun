@@ -31,9 +31,6 @@ export const doctorFactory = async (
       deleted,
     })
     .returning();
-  //   console.log({ doctor });
-  //   const [updatedDoctors3] = await db.query.doctors.findMany();
-  //   console.log({ updatedDoctors3 });
 
   return doctor as Exclude<typeof doctor, undefined>;
 };
