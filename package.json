@@ -4,13 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "lint": "bunx @biomejs/biome check .",
+    "lint": "bunx @biomejs/biome check . && tsc",
     "lint:fix": "bunx @biomejs/biome check . --apply",
     "makemigrations": "bunx drizzle-kit generate:sqlite",
     "migrate": "bun run src/db/migrate.ts",
-    "test":"bun test && bunx @biomejs/biome check .",
-    "test:coverage":"bun test --coverage",
-    "test:watch":"bun test --watch"
+    "test": "bun test && bunx @biomejs/biome check . && tsc",
+    "test:coverage": "bun test --coverage",
+    "test:watch": "bun test --watch"
   },
   "devDependencies": {
     "@biomejs/biome": "1.5.3",
@@ -22,6 +22,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@elysiajs/jwt": "^0.8.0",
     "@elysiajs/swagger": "^0.8.5",
     "@libsql/client": "^0.4.3",
     "@t3-oss/env-core": "^0.8.0",
