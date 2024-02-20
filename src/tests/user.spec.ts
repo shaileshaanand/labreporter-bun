@@ -29,6 +29,7 @@ describe("User Tests", () => {
     expect(data.lastName).toBe(user.lastName);
     expect(data.username).toBe(user.username);
     expect(data.passwordHash).toBeUndefined();
+    expect(data.password).toBeUndefined();
     expect(data.deleted).toBeUndefined();
   });
 

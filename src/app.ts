@@ -1,6 +1,7 @@
 import swagger from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { ZodError } from "zod";
+import authController from "./controllers/auth";
 import doctorsController from "./controllers/doctor";
 import usersContoller from "./controllers/user";
 import { APIError } from "./errors";
@@ -25,6 +26,7 @@ const app = new Elysia()
     // biome-ignore lint/suspicious/noConsoleLog: needs logging
     console.log(error);
   })
+  .use(authController)
   .use(doctorsController)
   .use(usersContoller);
 

@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import * as schema from "../db/schema";
+import { hashPassword } from "../helpers";
 import { generatePhoneNumber } from "./helpers";
 
 export const doctorFactory = async (
@@ -57,7 +58,7 @@ export const userFactory = async (
       firstName: firstName ?? faker.person.firstName(),
       lastName: lastName ?? faker.person.lastName(),
       username: username ?? faker.internet.userName(),
-      passwordHash: password,
+      passwordHash: await hashPassword(password),
       deleted,
     })
     .returning();

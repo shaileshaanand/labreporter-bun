@@ -5,6 +5,7 @@ const env = createEnv({
   server: {
     DB_URL: z.string().url(),
     DB_AUTH_TOKEN: z.string(),
+    JWT_SECRET: z.string(),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

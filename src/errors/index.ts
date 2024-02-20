@@ -14,3 +14,8 @@ export class NotFoundError extends APIError {
     super(message, 404);
   }
 }
+export class UnauthorizedError extends APIError {
+  constructor(public message: string) {
+    super(message, 401);
+  }
+}
