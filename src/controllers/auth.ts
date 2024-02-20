@@ -40,7 +40,7 @@ const authController = new Elysia({ prefix: "/auth" })
       }
 
       return {
-        token: jwt.sign({ id: user.id }),
+        token: await jwt.sign({ id: user.id }),
         user: {
           ...user,
           passwordHash: undefined,

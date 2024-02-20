@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { faker } from "@faker-js/faker";
 import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
+import { jwtVerify } from "jose";
 import app from "../app";
 import * as schema from "../db/schema";
+import env from "../env";
 import { userFactory } from "./factories";
 import fireRequest from "./fireRequest";
 
@@ -31,6 +33,13 @@ describe("Auth Tests", () => {
     });
     expect(response.status).toBe(200);
     expect(data.token).toBeDefined();
+    expect(
+      (async () =>
+        await jwtVerify(
+          data.token,
+          new TextEncoder().encode(env.JWT_SECRET),
+        ))(),
+    ).resolves.toBeDefined();
     expect(data.user.id).toBeDefined();
     expect(data.user.firstName).toBe(user.firstName);
     expect(data.user.lastName).toBe(user.lastName);
