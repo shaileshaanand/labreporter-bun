@@ -1,25 +1,32 @@
 import { Database } from "bun:sqlite";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 import { faker } from "@faker-js/faker";
-import { eq } from "drizzle-orm";
+import { type InferSelectModel, eq } from "drizzle-orm";
 import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import app from "../app";
 import * as schema from "../db/schema";
-import { doctorFactory } from "./factories";
+import { doctorFactory, userFactory } from "./factories";
 import fireRequest from "./fireRequest";
 import { generatePhoneNumber } from "./helpers";
 
 let db: BunSQLiteDatabase<typeof schema>;
+let user: InferSelectModel<typeof schema.users>;
+let userPassword: string;
 
 describe("Doctor Tests", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     db = drizzle(new Database(":memory:"), { schema });
     migrate(db, { migrationsFolder: "src/db/migrations" });
     mock.module("../context/db", () => {
       return { default: db };
     });
+    userPassword = faker.internet.password();
+    user = await userFactory(db, {
+      password: userPassword,
+    });
   });
+
   it("Should list all doctors", async () => {
     const doctors = await db
       .insert(schema.doctors)
@@ -32,7 +39,9 @@ describe("Doctor Tests", () => {
       )
       .returning();
 
-    const [response, data] = await fireRequest(app, "/doctor");
+    const [response, data] = await fireRequest(app, "/doctor", {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(200);
     expect(data.length).toBe(3);
@@ -45,12 +54,31 @@ describe("Doctor Tests", () => {
       expect(createdDoctor.deleted).toBe(undefined);
     });
   });
+  it("Should not list all doctors if unauthorized", async () => {
+    await db
+      .insert(schema.doctors)
+      .values(
+        [...Array(3)].map(() => ({
+          name: faker.person.fullName(),
+          phone: generatePhoneNumber(),
+          email: faker.internet.email(),
+        })),
+      )
+      .returning();
+
+    const [response, data] = await fireRequest(app, "/doctor");
+
+    expect(response.status).toBe(401);
+    expect(data.errors).toBeDefined();
+  });
 
   it("Should not list deleted doctors", async () => {
     const doctor = await doctorFactory(db);
     await doctorFactory(db, { deleted: true });
 
-    const [response, data] = await fireRequest(app, "/doctor");
+    const [response, data] = await fireRequest(app, "/doctor", {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(200);
     expect(data.length).toBe(1);
@@ -72,6 +100,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(201);
@@ -102,6 +131,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(201);
@@ -133,6 +163,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(201);
@@ -157,6 +188,25 @@ describe("Doctor Tests", () => {
   });
 
   it("Should not create a new doctor without name", async () => {
+    const body = {
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      phone: generatePhoneNumber(),
+    };
+    const [response, data] = await fireRequest(app, "/doctor", {
+      method: "POST",
+      body,
+    });
+
+    expect(response.status).toBe(401);
+    expect(data.id).toBeUndefined();
+    const doctorsInDB = await db.query.doctors.findMany({
+      where: eq(schema.doctors.id, data.id),
+    });
+    expect(doctorsInDB.length).toBe(0);
+  });
+
+  it("Should not create a new doctor if unauthorized", async () => {
     const body = {
       email: faker.internet.email(),
       phone: generatePhoneNumber(),
@@ -183,6 +233,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(400);
@@ -202,6 +253,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(400);
@@ -221,6 +273,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(400);
@@ -243,6 +296,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(400);
@@ -262,6 +316,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(400);
@@ -281,6 +336,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, "/doctor", {
       method: "POST",
       body,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(400);
@@ -294,7 +350,9 @@ describe("Doctor Tests", () => {
   it("Should get a doctor", async () => {
     const doctor = await doctorFactory(db);
 
-    const [response, data] = await fireRequest(app, `/doctor/${doctor.id}`);
+    const [response, data] = await fireRequest(app, `/doctor/${doctor.id}`, {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(200);
     expect(data.id).toBe(doctor.id);
@@ -307,15 +365,27 @@ describe("Doctor Tests", () => {
   it("Should not get a doctor if id is invalid", async () => {
     const doctor = await doctorFactory(db);
 
-    const [response] = await fireRequest(app, `/doctor/${doctor.id + 1}`);
+    const [response] = await fireRequest(app, `/doctor/${doctor.id + 1}`, {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(404);
+  });
+
+  it("Should not get a doctor if unauthorized", async () => {
+    const doctor = await doctorFactory(db);
+
+    const [response] = await fireRequest(app, `/doctor/${doctor.id}`);
+
+    expect(response.status).toBe(401);
   });
 
   it("Should not get a deleted doctor", async () => {
     const doctor = await doctorFactory(db, { deleted: true });
 
-    const [response, data] = await fireRequest(app, `/doctor/${doctor.id}`);
+    const [response, data] = await fireRequest(app, `/doctor/${doctor.id}`, {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(404);
     expect(data.errors).toBeDefined();
@@ -333,6 +403,7 @@ describe("Doctor Tests", () => {
     const [response, data] = await fireRequest(app, `/doctor/${doctor2.id}`, {
       method: "PUT",
       body: updatedDoctorPayload,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(200);
@@ -370,9 +441,35 @@ describe("Doctor Tests", () => {
     const [response] = await fireRequest(app, `/doctor/${doctor.id + 1}`, {
       method: "PUT",
       body: updatedDoctorPayload,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(404);
+    const [updatedDoctor] = await db.query.doctors.findMany({
+      where: eq(schema.doctors.id, doctor.id),
+    });
+
+    expect(updatedDoctor.id).toBe(doctor.id);
+    expect(updatedDoctor.name).toBe(doctor.name);
+    expect(updatedDoctor.email).toBe(doctor.email);
+    expect(updatedDoctor.phone).toBe(doctor.phone);
+    expect(updatedDoctor.deleted).toBe(false);
+  });
+
+  it("Should not update a doctor if unauthorized", async () => {
+    const doctor = await doctorFactory(db);
+    const updatedDoctorPayload = {
+      name: faker.person.fullName(),
+      email: faker.internet.email(),
+      phone: generatePhoneNumber(),
+    };
+
+    const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
+      method: "PUT",
+      body: updatedDoctorPayload,
+    });
+
+    expect(response.status).toBe(401);
     const [updatedDoctor] = await db.query.doctors.findMany({
       where: eq(schema.doctors.id, doctor.id),
     });
@@ -395,6 +492,7 @@ describe("Doctor Tests", () => {
     const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
       method: "PUT",
       body: updatedDoctorPayload,
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(404);
@@ -410,6 +508,7 @@ describe("Doctor Tests", () => {
 
     const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
       method: "DELETE",
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(204);
@@ -424,11 +523,31 @@ describe("Doctor Tests", () => {
     expect(deletedDoctor.deleted).toBe(true);
   });
 
+  it("Should not delete a doctor if unauthorized", async () => {
+    const doctor = await doctorFactory(db);
+
+    const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
+      method: "DELETE",
+    });
+
+    expect(response.status).toBe(401);
+    const [deletedDoctor] = await db.query.doctors.findMany({
+      where: eq(schema.doctors.id, doctor.id),
+    });
+
+    expect(deletedDoctor.id).toBe(doctor.id);
+    expect(deletedDoctor.name).toBe(doctor.name);
+    expect(deletedDoctor.email).toBe(doctor.email);
+    expect(deletedDoctor.phone).toBe(doctor.phone);
+    expect(deletedDoctor.deleted).toBe(false);
+  });
+
   it("Should not delete a doctor if id is invalid", async () => {
     const doctor = await doctorFactory(db);
 
     const [response] = await fireRequest(app, `/doctor/${doctor.id + 1}`, {
       method: "DELETE",
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(404);
@@ -447,6 +566,7 @@ describe("Doctor Tests", () => {
 
     const [response] = await fireRequest(app, `/doctor/${doctor.id}`, {
       method: "DELETE",
+      authUserId: user.id,
     });
 
     expect(response.status).toBe(404);

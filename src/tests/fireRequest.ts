@@ -1,23 +1,30 @@
 import type { Elysia } from "elysia";
+import { SignJWT } from "jose";
+import env from "../env";
 
 const fireRequest = async (
   app: Elysia,
   path: string,
   params: {
-    method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-    body?: object;
-    headers?: Headers;
-  } = { method: "GET" },
+    method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+    body?: Record<string, any>;
+    headers?: Record<string, string>;
+    authUserId?: number;
+  } = {},
 ): Promise<[Response, any]> => {
   const response = await app.handle(
     new Request(`http://localhost${path}`, {
-      ...params,
+      method: params.method ?? "GET",
       body: JSON.stringify(params.body),
-      headers: params.body
-        ? {
-            "Content-Type": "application/json",
-          }
-        : undefined,
+      headers: {
+        "Content-Type": "application/json",
+        authorization: params.authUserId
+          ? `Bearer ${await new SignJWT({ id: params.authUserId })
+              .setProtectedHeader({ alg: "HS256" })
+              .sign(new TextEncoder().encode(env.JWT_SECRET))}`
+          : "s",
+        ...params.headers,
+      },
     }),
   );
   try {
