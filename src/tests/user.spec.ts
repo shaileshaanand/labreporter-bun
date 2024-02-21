@@ -22,7 +22,9 @@ describe("User Tests", () => {
   it("Should get a user", async () => {
     const user = await userFactory(db, { password: faker.internet.password() });
 
-    const [response, data] = await fireRequest(app, `/user/${user.id}`);
+    const [response, data] = await fireRequest(app, `/user/${user.id}`, {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(200);
     expect(data.firstName).toBe(user.firstName);
@@ -36,9 +38,18 @@ describe("User Tests", () => {
   it("Should get not a user if id is invalid", async () => {
     const user = await userFactory(db, { password: faker.internet.password() });
 
-    const [response] = await fireRequest(app, `/user/${user.id + 1}`);
+    const [response] = await fireRequest(app, `/user/${user.id + 1}`, {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(404);
+  });
+  it("Should get not a user if unauthorized", async () => {
+    const user = await userFactory(db, { password: faker.internet.password() });
+
+    const [response] = await fireRequest(app, `/user/${user.id}`);
+
+    expect(response.status).toBe(401);
   });
 
   it("Should not get a deleted user", async () => {
@@ -47,7 +58,9 @@ describe("User Tests", () => {
       password: faker.internet.password(),
     });
 
-    const [response] = await fireRequest(app, `/user/${user.id}`);
+    const [response] = await fireRequest(app, `/user/${user.id}`, {
+      authUserId: user.id,
+    });
 
     expect(response.status).toBe(404);
   });
