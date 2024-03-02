@@ -104,3 +104,30 @@ export const patientFactory = async (
     .returning();
   return patient as Exclude<typeof patient, undefined>;
 };
+
+export const templateFactory = async (
+  db: BunSQLiteDatabase<typeof schema>,
+  {
+    name = null,
+    content = null,
+    deleted = false,
+  }: {
+    name?: string | null;
+    content?: string | null;
+    deleted?: boolean;
+  } = {
+    name: null,
+    deleted: false,
+  },
+) => {
+  const [template] = await db
+    .insert(schema.templates)
+    .values({
+      name: name ?? faker.lorem.sentence(),
+      content: content ?? faker.lorem.paragraph(),
+      deleted,
+    })
+    .returning();
+
+  return template as Exclude<typeof template, undefined>;
+};

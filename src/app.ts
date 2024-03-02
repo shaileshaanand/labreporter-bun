@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import authController from "./controllers/auth";
 import doctorsController from "./controllers/doctor";
 import patientsController from "./controllers/patient";
+import templatesController from "./controllers/template";
 import usersContoller from "./controllers/user";
 import { APIError } from "./errors";
 
@@ -30,6 +31,7 @@ const app = new Elysia()
   .use(authController)
   .use(doctorsController)
   .use(usersContoller)
-  .use(patientsController);
+  .use(patientsController)
+  .use(templatesController);
 
 export default app;

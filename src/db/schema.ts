@@ -35,3 +35,13 @@ export const patients = sqliteTable("patients", {
     () => new Date(),
   ),
 });
+
+export const templates = sqliteTable("templates", {
+  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+  name: text("name", { mode: "text" }).notNull(),
+  content: text("content", { mode: "text" }).notNull(),
+  deleted: integer("deleted", { mode: "boolean" }).default(false),
+  createdAt: integer("createdAt", { mode: "timestamp" }).$defaultFn(
+    () => new Date(),
+  ),
+});
