@@ -259,9 +259,7 @@ describe("Patient tests", () => {
   it("Should get not a patient if unauthorized", async () => {
     const patient = await patientFactory(db);
 
-    const [response, data] = await fireRequest(app, `/patient/${patient.id}`, {
-      method: "GET",
-    });
+    const [response, data] = await fireRequest(app, `/patient/${patient.id}`);
 
     expect(response.status).toBe(401);
     expect(data.id).toBeUndefined();
@@ -495,7 +493,7 @@ describe("Patient tests", () => {
     expect(data.errors).toBeDefined();
   });
 
-  it("Should not delete a patient if it is already deleted", async () => {
+  it("Should not delete a deleted patient", async () => {
     const patient = await patientFactory(db, { deleted: true });
 
     const [response, data] = await fireRequest(app, `/patient/${patient.id}`, {
@@ -514,5 +512,46 @@ describe("Patient tests", () => {
     expect(deletedPatient.age).toBe(patient.age);
     expect(deletedPatient.gender).toBe(patient.gender);
     expect(deletedPatient.deleted).toBe(true);
+  });
+
+  it("Should list all non deleted patients", async () => {
+    const patients = await Promise.all(
+      Array.from({ length: 10 }).map(() =>
+        patientFactory(db, {
+          deleted: faker.datatype.boolean({ probability: 0.75 }),
+        }),
+      ),
+    );
+
+    const notDeletedPatients = patients.filter((patient) => !patient.deleted);
+
+    const notDeletedPatientsCount = notDeletedPatients.length;
+
+    const [response, data] = await fireRequest(app, "/patient", {
+      authUserId: user.id,
+    });
+
+    expect(response.status).toBe(200);
+    expect(data.length).toBe(notDeletedPatientsCount);
+    notDeletedPatients.map((patient) => {
+      const patientInResponse = data.find((p: any) => p.id === patient.id);
+
+      expect(patientInResponse).toBeDefined();
+      expect(patientInResponse.name).toBe(patient.name);
+      expect(patientInResponse.phone).toBe(patient.phone);
+      expect(patientInResponse.email).toBe(patient.email);
+      expect(patientInResponse.age).toBe(patient.age);
+      expect(patientInResponse.gender).toBe(patient.gender);
+      expect(patientInResponse.deleted).toBeUndefined();
+    });
+  });
+
+  it("Should not list all patients if unauthorized", async () => {
+    await Promise.all(Array.from({ length: 10 }).map(() => patientFactory(db)));
+
+    const [response, data] = await fireRequest(app, "/patient");
+
+    expect(response.status).toBe(401);
+    expect(data.errors).toBeDefined();
   });
 });
