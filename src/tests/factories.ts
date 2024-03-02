@@ -65,3 +65,42 @@ export const userFactory = async (
 
   return user as Exclude<typeof user, undefined>;
 };
+
+export const patientFactory = async (
+  db: BunSQLiteDatabase<typeof schema>,
+  {
+    name = null,
+    email = null,
+    phone = null,
+    age = null,
+    gender = null,
+    deleted = false,
+  }: {
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    age?: number | null;
+    gender?: "male" | "female" | null;
+    deleted?: boolean;
+  } = {
+    name: null,
+    email: null,
+    phone: null,
+    age: null,
+    gender: null,
+    deleted: false,
+  },
+) => {
+  const [patient] = await db
+    .insert(schema.patients)
+    .values({
+      name: name ?? faker.person.fullName(),
+      phone: phone ?? generatePhoneNumber(),
+      email: email ?? faker.internet.email(),
+      age: age ?? faker.number.int({ min: 0, max: 120 }),
+      gender: gender ?? faker.helpers.arrayElement(["male", "female"]),
+      deleted,
+    })
+    .returning();
+  return patient as Exclude<typeof patient, undefined>;
+};
