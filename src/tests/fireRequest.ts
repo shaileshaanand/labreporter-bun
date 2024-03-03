@@ -9,23 +9,31 @@ const fireRequest = async (
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
     body?: Record<string, any>;
     headers?: Record<string, string>;
+    query?: Record<string, string>;
     authUserId?: number;
   } = {},
 ): Promise<[Response, any]> => {
+  let queryString = "";
+  if (params.query) {
+    queryString = new URLSearchParams(params.query).toString();
+  }
   const response = await app.handle(
-    new Request(`http://localhost${path}`, {
-      method: params.method ?? "GET",
-      body: JSON.stringify(params.body),
-      headers: {
-        "Content-Type": "application/json",
-        authorization: params.authUserId
-          ? `Bearer ${await new SignJWT({ id: params.authUserId })
-              .setProtectedHeader({ alg: "HS256" })
-              .sign(new TextEncoder().encode(env.JWT_SECRET))}`
-          : "s",
-        ...params.headers,
+    new Request(
+      `http://localhost${path}${queryString ? `?${queryString}` : ""}`,
+      {
+        method: params.method ?? "GET",
+        body: JSON.stringify(params.body),
+        headers: {
+          "Content-Type": "application/json",
+          authorization: params.authUserId
+            ? `Bearer ${await new SignJWT({ id: params.authUserId })
+                .setProtectedHeader({ alg: "HS256" })
+                .sign(new TextEncoder().encode(env.JWT_SECRET))}`
+            : "s",
+          ...params.headers,
+        },
       },
-    }),
+    ),
   );
   try {
     const jsonData = (await response.json()) as any;

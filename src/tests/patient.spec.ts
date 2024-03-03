@@ -527,15 +527,154 @@ describe("Patient tests", () => {
 
     const notDeletedPatientsCount = notDeletedPatients.length;
 
-    const [response, data] = await fireRequest(app, "/patient", {
+    const [response, responseData] = await fireRequest(app, "/patient", {
       authUserId: user.id,
     });
+
+    const { data } = responseData;
 
     expect(response.status).toBe(200);
     expect(data.length).toBe(notDeletedPatientsCount);
     notDeletedPatients.map((patient) => {
       const patientInResponse = data.find((p: any) => p.id === patient.id);
 
+      expect(patientInResponse).toBeDefined();
+      expect(patientInResponse.name).toBe(patient.name);
+      expect(patientInResponse.phone).toBe(patient.phone);
+      expect(patientInResponse.email).toBe(patient.email);
+      expect(patientInResponse.age).toBe(patient.age);
+      expect(patientInResponse.gender).toBe(patient.gender);
+      expect(patientInResponse.deleted).toBeUndefined();
+    });
+  });
+
+  it("Should filter patients by name", async () => {
+    const [patient1, _, patient3] = await Promise.all([
+      patientFactory(db, { name: "patient1x" }),
+      patientFactory(db, { name: "patient2x" }),
+      patientFactory(db, { name: "ent1x" }),
+    ]);
+
+    const [response, responseData] = await fireRequest(app, "/patient", {
+      query: { name: "ent1" },
+      authUserId: user.id,
+    });
+
+    const { data } = responseData;
+
+    expect(response.status).toBe(200);
+    expect(data.length).toBe(2);
+
+    const expectedPatients = [patient1, patient3];
+    expectedPatients.map((patient) => {
+      const patientInResponse = data.find((p: any) => p.id === patient.id);
+      expect(patientInResponse).toBeDefined();
+      expect(patientInResponse.name).toBe(patient.name);
+      expect(patientInResponse.phone).toBe(patient.phone);
+      expect(patientInResponse.email).toBe(patient.email);
+      expect(patientInResponse.age).toBe(patient.age);
+      expect(patientInResponse.gender).toBe(patient.gender);
+      expect(patientInResponse.deleted).toBeUndefined();
+    });
+  });
+
+  it("Should filter patients by phone number", async () => {
+    const [patient1, _, patient3] = await Promise.all([
+      patientFactory(db, { phone: "7234567890" }),
+      patientFactory(db, { phone: "7234567891" }),
+      patientFactory(db, { phone: "7234567890" }),
+    ]);
+
+    const [response, responseData] = await fireRequest(app, "/patient", {
+      query: { phone: "7234567890" },
+      authUserId: user.id,
+    });
+
+    const { data } = responseData;
+
+    expect(response.status).toBe(200);
+    expect(data.length).toBe(2);
+
+    const expectedPatients = [patient1, patient3];
+    expectedPatients.map((patient) => {
+      const patientInResponse = data.find((p: any) => p.id === patient.id);
+      expect(patientInResponse).toBeDefined();
+      expect(patientInResponse.name).toBe(patient.name);
+      expect(patientInResponse.phone).toBe(patient.phone);
+      expect(patientInResponse.email).toBe(patient.email);
+      expect(patientInResponse.age).toBe(patient.age);
+      expect(patientInResponse.gender).toBe(patient.gender);
+      expect(patientInResponse.deleted).toBeUndefined();
+    });
+  });
+
+  it("Should filter patients by email", async () => {
+    const [patient1, _, patient3] = await Promise.all([
+      patientFactory(db, { email: "patient1x@example.com" }),
+      patientFactory(db, { email: "patient2x@example.com" }),
+      patientFactory(db, { email: "patient1x@example.com" }),
+    ]);
+
+    const [response, responseData] = await fireRequest(app, "/patient", {
+      query: { email: "patient1x@example.com" },
+      authUserId: user.id,
+    });
+
+    const { data } = responseData;
+
+    expect(response.status).toBe(200);
+    expect(data.length).toBe(2);
+
+    const expectedPatients = [patient1, patient3];
+    expectedPatients.map((patient) => {
+      const patientInResponse = data.find((p: any) => p.id === patient.id);
+      expect(patientInResponse).toBeDefined();
+      expect(patientInResponse.name).toBe(patient.name);
+      expect(patientInResponse.phone).toBe(patient.phone);
+      expect(patientInResponse.email).toBe(patient.email);
+      expect(patientInResponse.age).toBe(patient.age);
+      expect(patientInResponse.gender).toBe(patient.gender);
+      expect(patientInResponse.deleted).toBeUndefined();
+    });
+  });
+
+  it("Should filter patients by query", async () => {
+    const [patient1, patient2, patient3, _] = await Promise.all([
+      patientFactory(db, {
+        name: "patient123x",
+        email: "patient5x@example.com",
+        phone: "7234567890",
+      }),
+      patientFactory(db, {
+        name: "patient2x",
+        email: "patient123x@example.com",
+        phone: "7555567890",
+      }),
+      patientFactory(db, {
+        name: "patient3x",
+        email: "patient1x@example.com",
+        phone: "7123567890",
+      }),
+      patientFactory(db, {
+        name: "patient4x",
+        email: "patient5x@example.com",
+        phone: "7234567890",
+      }),
+    ]);
+
+    const [response, responseData] = await fireRequest(app, "/patient", {
+      query: { query: "123" },
+      authUserId: user.id,
+    });
+
+    const { data } = responseData;
+
+    expect(response.status).toBe(200);
+    expect(data.length).toBe(3);
+
+    const expectedPatients = [patient1, patient2, patient3];
+    expectedPatients.map((patient) => {
+      const patientInResponse = data.find((p: any) => p.id === patient.id);
       expect(patientInResponse).toBeDefined();
       expect(patientInResponse.name).toBe(patient.name);
       expect(patientInResponse.phone).toBe(patient.phone);

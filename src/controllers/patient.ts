@@ -1,6 +1,7 @@
-import { and, eq } from "drizzle-orm";
+import { and, count, desc, eq, like, or } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 import { z } from "zod";
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from "../../config/constants";
 import context from "../context";
 import db from "../context/db";
 import { patients } from "../db/schema";
@@ -28,15 +29,87 @@ const patientsController = new Elysia({ prefix: "/patient" })
             gender: t.Enum(Gender),
           }),
         })
-        .get("/", async () => {
-          const patientsList = await db.query.patients.findMany({
-            columns: {
-              deleted: false,
-            },
-            where: eq(patients.deleted, false),
-          });
-          return patientsList;
-        })
+        .get(
+          "/",
+          async ({ query }) => {
+            const limit = query.limit ?? DEFAULT_PAGE_SIZE;
+            const page = query.page ?? 1;
+
+            const validator = z.object({
+              phone: z
+                .string()
+                .regex(/^[6-9]\d{9}$/)
+                .optional(),
+              name: z.string().optional(),
+              email: z.string().email().optional(),
+              query: z.string().optional(),
+              limit: z.number().min(1).max(MAX_PAGE_SIZE).optional(),
+              page: z.number().min(1).optional(),
+            });
+            const queryData = validator.parse(query);
+
+            const patientsList = await db.query.patients.findMany({
+              columns: {
+                deleted: false,
+              },
+              where: and(
+                queryData.name
+                  ? like(patients.name, `%${queryData.name}%`)
+                  : undefined,
+                queryData.phone
+                  ? eq(patients.phone, queryData.phone)
+                  : undefined,
+                queryData.email
+                  ? eq(patients.email, queryData.email)
+                  : undefined,
+                queryData.query
+                  ? or(
+                      like(patients.name, `%${queryData.query}%`),
+                      like(patients.phone, `%${queryData.query}%`),
+                      like(patients.email, `%${queryData.query}%`),
+                    )
+                  : undefined,
+                eq(patients.deleted, false),
+              ),
+              offset: (page - 1) * limit,
+              limit: limit + 1,
+              orderBy: [desc(patients.createdAt)],
+            });
+
+            const { total } = (
+              await db.select({ total: count() }).from(patients)
+            )[0];
+
+            const totalPages = Math.ceil(total / limit);
+
+            let hasMore = false;
+            if (patientsList.length > limit) {
+              patientsList.pop();
+              hasMore = true;
+            }
+
+            return {
+              data: patientsList,
+              hasMore,
+              page,
+              limit,
+              total,
+              totalPages,
+            };
+          },
+          {
+            query: t.Optional(
+              t.Object({
+                phone: t.Optional(t.String()),
+                name: t.Optional(t.String()),
+                email: t.Optional(t.String()),
+                query: t.Optional(t.String()),
+                limit: t.Optional(t.Number()),
+                page: t.Optional(t.Number()),
+              }),
+            ),
+          },
+        )
         .post(
           "/",
           async ({ body, set }) => {
