@@ -22,7 +22,7 @@ const usersContoller = new Elysia({ prefix: "/user" }).use(context).guard(
       .get(
         "/:id",
         async ({ params: { id } }) => {
-          const [user] = await db.query.users.findMany({
+          const user = await db.query.users.findFirst({
             columns: {
               deleted: false,
               passwordHash: false,

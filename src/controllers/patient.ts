@@ -139,7 +139,7 @@ const patientsController = new Elysia({ prefix: "/patient" })
         .get(
           "/:id",
           async ({ params: { id } }) => {
-            const [patient] = await db.query.patients.findMany({
+            const patient = await db.query.patients.findFirst({
               where: and(eq(patients.id, id), eq(patients.deleted, false)),
               columns: {
                 deleted: false,

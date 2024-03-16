@@ -55,7 +55,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" }).use(context).guard(
       .get(
         "/:id",
         async ({ params: { id } }) => {
-          const [doctor] = await db.query.doctors.findMany({
+          const doctor = await db.query.doctors.findFirst({
             where: and(eq(doctors.id, id), eq(doctors.deleted, false)),
             columns: {
               deleted: false,

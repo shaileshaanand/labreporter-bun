@@ -52,7 +52,7 @@ const templatesController = new Elysia({ prefix: "/template" })
         .get(
           "/:id",
           async ({ params: { id } }) => {
-            const [template] = await db.query.templates.findMany({
+            const template = await db.query.templates.findFirst({
               where: and(eq(templates.id, id), eq(templates.deleted, false)),
               columns: {
                 deleted: false,

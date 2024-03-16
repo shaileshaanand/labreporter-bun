@@ -46,9 +46,12 @@ describe("Patient tests", () => {
 
     expect(response.status).toBe(201);
     expect(data.id).toBeDefined();
-    const [createdPatient] = await db.query.patients.findMany({
+    const createdPatient = await db.query.patients.findFirst({
       where: eq(schema.patients.id, data.id),
     });
+    if (!createdPatient) {
+      throw new Error("Patient not found");
+    }
     expect(createdPatient.name).toBe(patient.name);
     expect(createdPatient.phone).toBe(patient.phone);
     expect(createdPatient.email).toBe(patient.email);
@@ -340,7 +343,10 @@ describe("Patient tests", () => {
     expect(data.age).toBe(newPatient.age);
     expect(data.gender).toBe(newPatient.gender);
     expect(data.deleted).toBeUndefined();
-    const [updatedPatientInDB] = await db.query.patients.findMany();
+    const updatedPatientInDB = await db.query.patients.findFirst();
+    if (!updatedPatientInDB) {
+      throw new Error("Patient not found");
+    }
     expect(updatedPatientInDB.id).toBe(patient.id);
     expect(updatedPatientInDB.name).toBe(newPatient.name);
     expect(updatedPatientInDB.phone).toBe(newPatient.phone);
@@ -372,7 +378,10 @@ describe("Patient tests", () => {
       },
     );
 
-    const [updatedPatient] = await db.query.patients.findMany();
+    const updatedPatient = await db.query.patients.findFirst();
+    if (!updatedPatient) {
+      throw new Error("Patient not found");
+    }
     expect(response.status).toBe(404);
     expect(data.id).toBeUndefined();
     expect(data.name).toBeUndefined();
@@ -408,7 +417,10 @@ describe("Patient tests", () => {
       body: newPatient,
     });
 
-    const [updatedPatient] = await db.query.patients.findMany();
+    const updatedPatient = await db.query.patients.findFirst();
+    if (!updatedPatient) {
+      throw new Error("Patient not found");
+    }
     expect(response.status).toBe(401);
     expect(data.id).toBeUndefined();
     expect(data.name).toBeUndefined();
@@ -437,7 +449,10 @@ describe("Patient tests", () => {
 
     expect(response.status).toBe(204);
 
-    const [deletedPatient] = await db.query.patients.findMany();
+    const deletedPatient = await db.query.patients.findFirst();
+    if (!deletedPatient) {
+      throw new Error("Patient not found");
+    }
 
     expect(deletedPatient.id).toBe(patient.id);
     expect(deletedPatient.name).toBe(patient.name);
@@ -457,7 +472,10 @@ describe("Patient tests", () => {
 
     expect(response.status).toBe(401);
 
-    const [deletedPatient] = await db.query.patients.findMany();
+    const deletedPatient = await db.query.patients.findFirst();
+    if (!deletedPatient) {
+      throw new Error("Patient not found");
+    }
     expect(deletedPatient.id).toBe(patient.id);
     expect(deletedPatient.name).toBe(patient.name);
     expect(deletedPatient.phone).toBe(patient.phone);
@@ -482,7 +500,10 @@ describe("Patient tests", () => {
 
     expect(response.status).toBe(404);
 
-    const [deletedPatient] = await db.query.patients.findMany();
+    const deletedPatient = await db.query.patients.findFirst();
+    if (!deletedPatient) {
+      throw new Error("Patient not found");
+    }
     expect(deletedPatient.id).toBe(patient.id);
     expect(deletedPatient.name).toBe(patient.name);
     expect(deletedPatient.phone).toBe(patient.phone);
@@ -504,7 +525,10 @@ describe("Patient tests", () => {
     expect(response.status).toBe(404);
     expect(data.errors).toBeDefined();
 
-    const [deletedPatient] = await db.query.patients.findMany();
+    const deletedPatient = await db.query.patients.findFirst();
+    if (!deletedPatient) {
+      throw new Error("Patient not found");
+    }
     expect(deletedPatient.id).toBe(patient.id);
     expect(deletedPatient.name).toBe(patient.name);
     expect(deletedPatient.phone).toBe(patient.phone);
@@ -550,13 +574,13 @@ describe("Patient tests", () => {
 
   it("Should filter patients by name", async () => {
     const [patient1, _, patient3] = await Promise.all([
-      patientFactory(db, { name: "patient1x" }),
+      patientFactory(db, { name: "patienT1x" }),
       patientFactory(db, { name: "patient2x" }),
       patientFactory(db, { name: "ent1x" }),
     ]);
 
     const [response, responseData] = await fireRequest(app, "/patient", {
-      query: { name: "ent1" },
+      query: { name: "Ent1" },
       authUserId: user.id,
     });
 

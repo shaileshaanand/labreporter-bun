@@ -105,21 +105,21 @@ describe("Doctor Tests", () => {
 
     expect(response.status).toBe(201);
     expect(data.id).toBeDefined();
-    const doctorsInDB = await db.query.doctors.findMany({
+    const createdDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, data.id),
     });
 
-    expect(doctorsInDB.length).toBe(1);
-    expect(doctorsInDB[0]).toBeDefined();
-    const doctor = doctorsInDB[0] as Exclude<
-      (typeof doctorsInDB)[0],
-      undefined
-    >;
-    expect(doctor.id).toBe(data.id);
-    expect(doctor.name).toBe(data.name);
-    expect(doctor.email).toBe(data.email);
-    expect(doctor.phone).toBe(data.phone);
-    expect(doctor.deleted).toBe(false);
+    expect(createdDoctor).toBeDefined();
+
+    if (!createdDoctor) {
+      throw new Error("Doctor not found");
+    }
+
+    expect(createdDoctor.id).toBe(data.id);
+    expect(createdDoctor.name).toBe(data.name);
+    expect(createdDoctor.email).toBe(data.email);
+    expect(createdDoctor.phone).toBe(data.phone);
+    expect(createdDoctor.deleted).toBe(false);
     expect(data.deleted).toBe(undefined);
   });
 
@@ -445,9 +445,13 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(404);
-    const [updatedDoctor] = await db.query.doctors.findMany({
+    const updatedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
+
+    if (!updatedDoctor) {
+      throw new Error("Doctor not found");
+    }
 
     expect(updatedDoctor.id).toBe(doctor.id);
     expect(updatedDoctor.name).toBe(doctor.name);
@@ -470,9 +474,13 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(401);
-    const [updatedDoctor] = await db.query.doctors.findMany({
+    const updatedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
+
+    if (!updatedDoctor) {
+      throw new Error("Doctor not found");
+    }
 
     expect(updatedDoctor.id).toBe(doctor.id);
     expect(updatedDoctor.name).toBe(doctor.name);
@@ -496,9 +504,13 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(404);
-    const [updatedDoctor] = await db.query.doctors.findMany({
+    const updatedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
+
+    if (!updatedDoctor) {
+      throw new Error("Doctor not found");
+    }
 
     expect(updatedDoctor.id).toBe(doctor.id);
   });
@@ -512,9 +524,13 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(204);
-    const [deletedDoctor] = await db.query.doctors.findMany({
+    const deletedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
+
+    if (!deletedDoctor) {
+      throw new Error("Doctor not found");
+    }
 
     expect(deletedDoctor.id).toBe(doctor.id);
     expect(deletedDoctor.name).toBe(doctor.name);
@@ -531,9 +547,13 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(401);
-    const [deletedDoctor] = await db.query.doctors.findMany({
+    const deletedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
+
+    if (!deletedDoctor) {
+      throw new Error("Doctor not found");
+    }
 
     expect(deletedDoctor.id).toBe(doctor.id);
     expect(deletedDoctor.name).toBe(doctor.name);
@@ -551,9 +571,13 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(404);
-    const [deletedDoctor] = await db.query.doctors.findMany({
+    const deletedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
+
+    if (!deletedDoctor) {
+      throw new Error("Doctor not found");
+    }
 
     expect(deletedDoctor.id).toBe(doctor.id);
     expect(deletedDoctor.name).toBe(doctor.name);
@@ -570,10 +594,18 @@ describe("Doctor Tests", () => {
     });
 
     expect(response.status).toBe(404);
-    const [deletedDoctor] = await db.query.doctors.findMany({
+    const deletedDoctor = await db.query.doctors.findFirst({
       where: eq(schema.doctors.id, doctor.id),
     });
 
+    if (!deletedDoctor) {
+      throw new Error("Doctor not found");
+    }
+
     expect(deletedDoctor.deleted).toBe(true);
+    expect(deletedDoctor.id).toBe(doctor.id);
+    expect(deletedDoctor.name).toBe(doctor.name);
+    expect(deletedDoctor.email).toBe(doctor.email);
+    expect(deletedDoctor.phone).toBe(doctor.phone);
   });
 });

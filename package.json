@@ -27,7 +27,7 @@
     "@elysiajs/swagger": "^0.8.5",
     "@libsql/client": "^0.4.3",
     "@t3-oss/env-core": "^0.8.0",
-    "drizzle-orm": "^0.29.3",
+    "drizzle-orm": "^0.30.2",
     "elysia": "^0.8.9",
     "zod": "^3.22.4"
   }

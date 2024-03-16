@@ -27,7 +27,7 @@ const authController = new Elysia({ prefix: "/auth" })
         password,
       });
 
-      const [user] = await db.query.users.findMany({
+      const user = await db.query.users.findFirst({
         where: and(eq(users.username, username), eq(users.deleted, false)),
       });
 

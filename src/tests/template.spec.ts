@@ -41,9 +41,13 @@ describe("Template Tests", () => {
     expect(response.status).toBe(201);
     expect(data.id).toBeDefined();
 
-    const [createdTemplate] = await db.query.templates.findMany({
+    const createdTemplate = await db.query.templates.findFirst({
       where: eq(schema.templates.id, data.id),
     });
+
+    if (!createdTemplate) {
+      throw new Error("Template not found");
+    }
 
     expect(createdTemplate.name).toBe(template.name);
     expect(createdTemplate.content).toBe(template.content);
@@ -206,9 +210,12 @@ describe("Template Tests", () => {
     expect(data.content).toBe(newTemplate.content);
     expect(data.deleted).toBeUndefined();
 
-    const [updatedTemplate] = await db.query.templates.findMany({
+    const updatedTemplate = await db.query.templates.findFirst({
       where: eq(schema.templates.id, template.id),
     });
+    if (!updatedTemplate) {
+      throw new Error("Template not found");
+    }
     expect(updatedTemplate.id).toBe(template.id);
     expect(updatedTemplate.name).toBe(newTemplate.name);
     expect(updatedTemplate.content).toBe(newTemplate.content);
@@ -239,9 +246,14 @@ describe("Template Tests", () => {
     expect(data.content).toBe(newTemplate.content);
     expect(data.deleted).toBeUndefined();
 
-    const [updatedTemplate] = await db.query.templates.findMany({
+    const updatedTemplate = await db.query.templates.findFirst({
       where: eq(schema.templates.id, template.id),
     });
+
+    if (!updatedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(updatedTemplate.id).toBe(template.id);
     expect(updatedTemplate.name).toBe(newTemplate.name);
     expect(updatedTemplate.content).toBe(newTemplate.content);
@@ -273,9 +285,14 @@ describe("Template Tests", () => {
     expect(data.deleted).toBeUndefined();
     expect(data.errors).toBeDefined();
 
-    const [updatedTemplate] = await db.query.templates.findMany({
+    const updatedTemplate = await db.query.templates.findFirst({
       where: eq(schema.templates.id, template.id),
     });
+
+    if (!updatedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(updatedTemplate.id).toBe(template.id);
     expect(updatedTemplate.name).toBe(template.name);
     expect(updatedTemplate.content).toBe(template.content);
@@ -304,9 +321,14 @@ describe("Template Tests", () => {
     expect(data.content).toBeUndefined();
     expect(data.deleted).toBeUndefined();
     expect(data.errors).toBeDefined();
-    const [updatedTemplate] = await db.query.templates.findMany({
+    const updatedTemplate = await db.query.templates.findFirst({
       where: eq(schema.templates.id, template.id),
     });
+
+    if (!updatedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(updatedTemplate.id).toBe(template.id);
     expect(updatedTemplate.name).toBe(template.name);
     expect(updatedTemplate.content).toBe(template.content);
@@ -322,7 +344,12 @@ describe("Template Tests", () => {
     });
 
     expect(response.status).toBe(204);
-    const [deletedTemplate] = await db.query.templates.findMany();
+    const deletedTemplate = await db.query.templates.findFirst();
+
+    if (!deletedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(deletedTemplate.id).toBe(template.id);
     expect(deletedTemplate.name).toBe(template.name);
     expect(deletedTemplate.content).toBe(template.content);
@@ -347,7 +374,12 @@ describe("Template Tests", () => {
     expect(data.deleted).toBeUndefined();
     expect(data.errors).toBeDefined();
 
-    const [deletedTemplate] = await db.query.templates.findMany();
+    const deletedTemplate = await db.query.templates.findFirst();
+
+    if (!deletedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(deletedTemplate.id).toBe(template.id);
     expect(deletedTemplate.name).toBe(template.name);
     expect(deletedTemplate.content).toBe(template.content);
@@ -373,7 +405,12 @@ describe("Template Tests", () => {
     expect(data.deleted).toBeUndefined();
     expect(data.errors).toBeDefined();
 
-    const [deletedTemplate] = await db.query.templates.findMany();
+    const deletedTemplate = await db.query.templates.findFirst();
+
+    if (!deletedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(deletedTemplate.id).toBe(template.id);
     expect(deletedTemplate.name).toBe(template.name);
     expect(deletedTemplate.content).toBe(template.content);
@@ -399,7 +436,12 @@ describe("Template Tests", () => {
     expect(data.deleted).toBeUndefined();
     expect(data.errors).toBeDefined();
 
-    const [deletedTemplate] = await db.query.templates.findMany();
+    const deletedTemplate = await db.query.templates.findFirst();
+
+    if (!deletedTemplate) {
+      throw new Error("Template not found");
+    }
+
     expect(deletedTemplate.id).toBe(template.id);
     expect(deletedTemplate.name).toBe(template.name);
     expect(deletedTemplate.content).toBe(template.content);
