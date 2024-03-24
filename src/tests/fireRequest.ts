@@ -1,9 +1,10 @@
 import type { Elysia } from "elysia";
 import { SignJWT } from "jose";
 import env from "../env";
+import { omitUndefinedValues } from "../helpers";
 
 const fireRequest = async (
-  app: Elysia,
+  app: Elysia<any, any, any, any, any, any, any, any>,
   path: string,
   params: {
     method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -23,15 +24,15 @@ const fireRequest = async (
       {
         method: params.method ?? "GET",
         body: JSON.stringify(params.body),
-        headers: {
-          "Content-Type": "application/json",
+        headers: omitUndefinedValues({
+          "Content-Type": params.body ? "application/json" : undefined,
           authorization: params.authUserId
             ? `Bearer ${await new SignJWT({ id: params.authUserId })
                 .setProtectedHeader({ alg: "HS256" })
                 .sign(new TextEncoder().encode(env.JWT_SECRET))}`
             : "s",
           ...params.headers,
-        },
+        }),
       },
     ),
   );
