@@ -48,29 +48,27 @@ const patientsController = new Elysia({ prefix: "/patient" })
             });
             const queryData = validator.parse(query);
 
+            const filter = and(
+              queryData.name
+                ? like(patients.name, `%${queryData.name}%`)
+                : undefined,
+              queryData.phone ? eq(patients.phone, queryData.phone) : undefined,
+              queryData.email ? eq(patients.email, queryData.email) : undefined,
+              queryData.query
+                ? or(
+                    like(patients.name, `%${queryData.query}%`),
+                    like(patients.phone, `%${queryData.query}%`),
+                    like(patients.email, `%${queryData.query}%`),
+                  )
+                : undefined,
+              eq(patients.deleted, false),
+            );
+
             const patientsList = await db.query.patients.findMany({
               columns: {
                 deleted: false,
               },
-              where: and(
-                queryData.name
-                  ? like(patients.name, `%${queryData.name}%`)
-                  : undefined,
-                queryData.phone
-                  ? eq(patients.phone, queryData.phone)
-                  : undefined,
-                queryData.email
-                  ? eq(patients.email, queryData.email)
-                  : undefined,
-                queryData.query
-                  ? or(
-                      like(patients.name, `%${queryData.query}%`),
-                      like(patients.phone, `%${queryData.query}%`),
-                      like(patients.email, `%${queryData.query}%`),
-                    )
-                  : undefined,
-                eq(patients.deleted, false),
-              ),
+              where: filter,
               offset: (page - 1) * limit,
               limit: limit + 1,
               orderBy: [desc(patients.createdAt)],
