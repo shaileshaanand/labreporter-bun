@@ -74,7 +74,7 @@ describe("Template Tests", () => {
   });
 
   it.each([[null], [undefined], ["ab"]])(
-    "Should not create a new Template with invalid name: %s",
+    "Should not create a new Template with invalid name: %p",
     async (name) => {
       const template = {
         name,
@@ -95,7 +95,7 @@ describe("Template Tests", () => {
   );
 
   it.each([[null], [undefined], ["ab"]])(
-    "Should not create a new Template with invalid content: %s",
+    "Should not create a new Template with invalid content: %p",
     async (content) => {
       const template = {
         name: faker.lorem.sentence(),

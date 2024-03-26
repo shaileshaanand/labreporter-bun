@@ -67,7 +67,7 @@ describe("Auth Tests", () => {
     [faker.internet.userName(), undefined],
     [faker.internet.userName(), faker.internet.password()],
   ])(
-    "Should not login a user if username:password :: %s:%s",
+    "Should not login a user if username:password :: %p:%p",
     async (username, password) => {
       const correctPassword = faker.internet.password();
       const user = await userFactory(db, {
@@ -90,7 +90,7 @@ describe("Auth Tests", () => {
     [undefined, ""],
     ["", ""],
   ])(
-    "Should not login a user if username:password :: %s:%s (empty)",
+    "Should not login a user if username:password :: %p:%p (empty)",
     async (username, password) => {
       const correctPassword = faker.internet.password();
       const user = await userFactory(db, { password: correctPassword });

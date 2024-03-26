@@ -94,7 +94,7 @@ describe("Patient tests", () => {
     [faker.string.sample(10)],
     [null],
   ])(
-    "Should not create patient with invalid phone number: %s",
+    "Should not create patient with invalid phone number: %p",
     async (phone) => {
       const patient = {
         name: faker.person.firstName(),
@@ -122,7 +122,7 @@ describe("Patient tests", () => {
   );
 
   it.each([[faker.string.alpha(2)], [null], [undefined]])(
-    "Should not create patient with invalid name: %s",
+    "Should not create patient with invalid name: %p",
     async (name) => {
       const patient = {
         name,
@@ -162,7 +162,7 @@ describe("Patient tests", () => {
       }),
     ],
     [null],
-  ])("Should not create patient with invalid age: %s", async (age) => {
+  ])("Should not create patient with invalid age: %p", async (age) => {
     const patient = {
       name: faker.person.firstName(),
       phone: generatePhoneNumber(),
@@ -188,7 +188,7 @@ describe("Patient tests", () => {
   });
 
   it.each([[faker.lorem.word()], [null], [undefined]])(
-    "Should not create patient with invalid gender: %s",
+    "Should not create patient with invalid gender: %p",
     async (gender) => {
       const patient = {
         name: faker.person.firstName(),
@@ -214,7 +214,7 @@ describe("Patient tests", () => {
   );
 
   it.each([[faker.lorem.word()], [null]])(
-    "Should not create patient with invalid gender: %s",
+    "Should not create patient with invalid gender: %p",
     async (email) => {
       const patient = {
         name: faker.person.firstName(),
