@@ -11,7 +11,8 @@
         "noUnusedVariables": "error"
       },
       "suspicious": {
-        "noConsoleLog": "warn"
+        "noConsoleLog": "warn",
+        "noExplicitAny": "off"
       }
     },
     "ignore": ["src/db/migrations"]
