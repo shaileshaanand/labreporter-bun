@@ -1,6 +1,7 @@
 import swagger from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { ZodError } from "zod";
+import USGReportsController from "./controllers/USGReport";
 import authController from "./controllers/auth";
 import doctorsController from "./controllers/doctor";
 import patientsController from "./controllers/patient";
@@ -32,6 +33,7 @@ const app = new Elysia()
   .use(doctorsController)
   .use(usersContoller)
   .use(patientsController)
-  .use(templatesController);
+  .use(templatesController)
+  .use(USGReportsController);
 
 export default app;

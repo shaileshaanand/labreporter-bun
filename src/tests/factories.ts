@@ -131,3 +131,43 @@ export const templateFactory = async (
 
   return template as Exclude<typeof template, undefined>;
 };
+
+export const USGReportFactory = async (
+  db: BunSQLiteDatabase<typeof schema>,
+  {
+    patientId = null,
+    referrerId = null,
+    partOfScan = null,
+    findings = null,
+    date = null,
+    deleted = false,
+  }: {
+    patientId?: number | null;
+    referrerId?: number | null;
+    partOfScan?: string | null;
+    findings?: string | null;
+    date?: Date | null;
+    deleted?: boolean;
+  } = {
+    patientId: null,
+    referrerId: null,
+    partOfScan: null,
+    findings: null,
+    date: null,
+    deleted: false,
+  },
+) => {
+  const [USGReport] = await db
+    .insert(schema.USGReports)
+    .values({
+      patientId: patientId ?? (await patientFactory(db)).id,
+      referrerId: referrerId ?? (await doctorFactory(db)).id,
+      partOfScan: partOfScan ?? faker.lorem.sentence(),
+      findings: findings ?? faker.lorem.paragraph(),
+      date: date ?? faker.date.recent({ days: 30 }),
+      deleted,
+    })
+    .returning();
+
+  return USGReport;
+};
