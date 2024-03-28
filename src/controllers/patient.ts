@@ -11,6 +11,16 @@ enum Gender {
   male = "male",
   female = "female",
 }
+const patientValidator = z.object({
+  name: z.string().min(3).max(255),
+  phone: z
+    .string()
+    .regex(/^[6-9]\d{9}$/)
+    .optional(),
+  email: z.string().email().optional(),
+  age: z.number().min(0).max(120).optional(),
+  gender: z.enum(["male", "female"]),
+});
 
 const patientsController = new Elysia({ prefix: "/patient" })
   .use(context)
@@ -111,17 +121,7 @@ const patientsController = new Elysia({ prefix: "/patient" })
         .post(
           "/",
           async ({ body, set }) => {
-            const validator = z.object({
-              name: z.string().min(3).max(255),
-              phone: z
-                .string()
-                .regex(/^[6-9]\d{9}$/)
-                .optional(),
-              email: z.string().email().optional(),
-              age: z.number().min(0).max(120).optional(),
-              gender: z.enum(["male", "female"]),
-            });
-            const data = validator.parse(body);
+            const data = patientValidator.parse(body);
             const [createdPatient] = await db
               .insert(patients)
               .values(data)
@@ -159,17 +159,7 @@ const patientsController = new Elysia({ prefix: "/patient" })
         .put(
           "/:id",
           async ({ params: { id }, body }) => {
-            const validator = z.object({
-              name: z.string().min(3).max(255),
-              phone: z
-                .string()
-                .regex(/^[6-9]\d{9}$/)
-                .optional(),
-              email: z.string().email().optional(),
-              age: z.number().optional(),
-              gender: z.enum(["male", "female"]).optional(),
-            });
-            const data = validator.parse(body);
+            const data = patientValidator.parse(body);
             const [updatedPatient] = await db
               .update(patients)
               .set(data)

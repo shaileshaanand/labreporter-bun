@@ -6,6 +6,11 @@ import db from "../context/db";
 import { templates } from "../db/schema";
 import { NotFoundError } from "../errors";
 
+const patientValidator = z.object({
+  name: z.string().min(3),
+  content: z.string().min(3),
+});
+
 const templatesController = new Elysia({ prefix: "/template" })
   .use(context)
   .guard(
@@ -32,11 +37,7 @@ const templatesController = new Elysia({ prefix: "/template" })
         .post(
           "/",
           async ({ body, set }) => {
-            const validator = z.object({
-              name: z.string().min(3),
-              content: z.string().min(3),
-            });
-            const data = validator.parse(body);
+            const data = patientValidator.parse(body);
             const [createdTemplate] = await db
               .insert(templates)
               .values(data)
@@ -70,11 +71,7 @@ const templatesController = new Elysia({ prefix: "/template" })
         .put(
           "/:id",
           async ({ params: { id }, body }) => {
-            const validator = z.object({
-              name: z.string().min(3),
-              content: z.string().min(3),
-            });
-            const data = validator.parse(body);
+            const data = patientValidator.parse(body);
             const [updatedTemplate] = await db
               .update(templates)
               .set(data)

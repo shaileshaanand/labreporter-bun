@@ -18,7 +18,7 @@ let db: BunSQLiteDatabase<typeof schema>;
 let user: InferSelectModel<typeof schema.users>;
 let userPassword: string;
 
-describe("Patient tests", () => {
+describe("USGReport tests", () => {
   beforeEach(async () => {
     const sqliteDb = new Database(":memory:");
     sqliteDb.exec("PRAGMA foreign_keys = ON;");

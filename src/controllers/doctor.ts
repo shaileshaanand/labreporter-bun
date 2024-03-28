@@ -6,6 +6,15 @@ import db from "../context/db";
 import { doctors } from "../db/schema";
 import { NotFoundError } from "../errors";
 
+const doctorValidator = z.object({
+  name: z.string().min(3).max(255),
+  phone: z
+    .string()
+    .regex(/^[6-9]\d{9}$/)
+    .optional(),
+  email: z.string().email().optional(),
+});
+
 const doctorsController = new Elysia({ prefix: "/doctor" }).use(context).guard(
   {
     ensureLoggedIn: true,
@@ -31,15 +40,7 @@ const doctorsController = new Elysia({ prefix: "/doctor" }).use(context).guard(
       .post(
         "/",
         async ({ body, set }) => {
-          const validator = z.object({
-            name: z.string().min(3).max(255),
-            phone: z
-              .string()
-              .regex(/^[6-9]\d{9}$/)
-              .optional(),
-            email: z.string().email().optional(),
-          });
-          const data = validator.parse(body);
+          const data = doctorValidator.parse(body);
           const [createdDoctor] = await db
             .insert(doctors)
             .values(data)
@@ -75,9 +76,10 @@ const doctorsController = new Elysia({ prefix: "/doctor" }).use(context).guard(
       .put(
         "/:id",
         async ({ body, params: { id } }) => {
+          const data = doctorValidator.parse(body);
           const [updatedDoctor] = await db
             .update(doctors)
-            .set(body)
+            .set(data)
             .where(and(eq(doctors.id, id), eq(doctors.deleted, false)))
             .returning();
           if (updatedDoctor === undefined) {
