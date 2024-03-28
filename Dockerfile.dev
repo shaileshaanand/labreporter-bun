@@ -1,7 +1,7 @@
 FROM oven/bun:slim
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y curl && \
+RUN apt update && apt install -y curl dumb-init && \
     curl -fsSL https://raw.githubusercontent.com/tj/n/master/bin/n | bash -s 20 && \
     apt purge -y curl && \
     apt autoremove -y && \

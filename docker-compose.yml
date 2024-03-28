@@ -16,7 +16,7 @@ services:
       - 3000:3000
     depends_on:
       - db
-    command: bun run dev
+    command: dumb-init bun run dev
 
   db:
     image: ghcr.io/tursodatabase/libsql-server:latest
