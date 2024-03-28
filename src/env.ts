@@ -6,6 +6,7 @@ const env = createEnv({
     DB_URL: z.string().url(),
     DB_AUTH_TOKEN: z.string(),
     JWT_SECRET: z.string(),
+    DB_TLS: z.enum(["true", "false"]).transform((value) => value === "true"),
   },
   runtimeEnv: process.env,
   emptyStringAsUndefined: true,

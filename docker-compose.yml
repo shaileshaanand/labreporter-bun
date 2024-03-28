@@ -7,8 +7,22 @@ services:
     volumes:
       - ./:/home/bun/app
       - /home/bun/app/node_modules
-    env_file:
-      - .env
+    environment:
+      - DB_URL=libsql://db:8080
+      - JWT_SECRET=asjklklasfldkscvmxcmnwedjkhfuiowkjdsfkbsdfhjvbsfdbvfjhfhjkdfkhgvdfjhieurcxnvbedfuvmgbntjk
+      - DB_AUTH_TOKEN=xyz
+      - DB_TLS=false
     ports:
       - 3000:3000
     command: bun run dev
+
+  db:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    volumes:
+      - data:/var/lib/sqld
+    environment:
+      - SQLD_NODE=primary
+      - SQLD_HTTP_LISTEN_ADDR=0.0.0.0:8080
+
+volumes:
+  data:
