@@ -1,6 +1,6 @@
 import db from "../context/db";
 
-import { parseArgs } from "util";
+import { parseArgs } from "node:util";
 import { users } from "../db/schema";
 import { hashPassword } from "../helpers";
 
