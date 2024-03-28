@@ -36,6 +36,13 @@
       "when": 1711334918468,
       "tag": "0004_needy_raider",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1711601999084,
+      "tag": "0005_slimy_stranger",
+      "breakpoints": true
     }
   ]
 }

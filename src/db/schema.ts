@@ -10,6 +10,9 @@ export const doctors = sqliteTable("doctors", {
   createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(
     () => new Date(),
   ),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 });
 
 export const users = sqliteTable("users", {
@@ -22,6 +25,9 @@ export const users = sqliteTable("users", {
   createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(
     () => new Date(),
   ),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 });
 
 export const patients = sqliteTable("patients", {
@@ -35,6 +41,9 @@ export const patients = sqliteTable("patients", {
   createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(
     () => new Date(),
   ),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 });
 
 export const templates = sqliteTable("templates", {
@@ -45,6 +54,9 @@ export const templates = sqliteTable("templates", {
   createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(
     () => new Date(),
   ),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 });
 
 export const USGReports = sqliteTable("USGReports", {
@@ -62,6 +74,9 @@ export const USGReports = sqliteTable("USGReports", {
   createdAt: integer("createdAt", { mode: "timestamp_ms" }).$defaultFn(
     () => new Date(),
   ),
+  updatedAt: integer("updatedAt", { mode: "timestamp_ms" })
+    .$defaultFn(() => new Date())
+    .$onUpdate(() => new Date()),
 });
 
 export const patientsRelations = relations(patients, ({ many }) => ({
