@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
+    "prod": "bun run src/index.ts",
     "lint": "bunx @biomejs/biome check . && tsc",
     "lint:fix": "bunx @biomejs/biome check . --apply",
     "makemigrations": "bunx drizzle-kit generate:sqlite",
@@ -25,7 +26,7 @@
   "dependencies": {
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/swagger": "^1.0.3",
-    "@libsql/client": "^0.4.3",
+    "@libsql/client": "^0.5.6",
     "@t3-oss/env-core": "^0.8.0",
     "drizzle-orm": "^0.30.5",
     "elysia": "^1.0.9",
