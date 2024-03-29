@@ -1,0 +1,2 @@
+CREATE INDEX `idx_usgreports_deleted_createdat_id` ON `USGReports` (`deleted`,`createdAt`,`id`);--> statement-breakpoint
+CREATE INDEX `idx_patients_deleted_createdat_id` ON `patients` (`deleted`,`createdAt`,`id`);

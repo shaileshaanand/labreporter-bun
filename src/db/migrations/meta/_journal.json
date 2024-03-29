@@ -43,6 +43,13 @@
       "when": 1711601999084,
       "tag": "0005_slimy_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1711688418192,
+      "tag": "0006_curly_mandarin",
+      "breakpoints": true
     }
   ]
 }
