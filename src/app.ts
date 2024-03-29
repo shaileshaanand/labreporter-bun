@@ -1,3 +1,4 @@
+import { cors } from "@elysiajs/cors";
 import swagger from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { ZodError } from "zod";
@@ -11,6 +12,7 @@ import { APIError } from "./errors";
 
 const app = new Elysia()
   .use(swagger())
+  .use(cors())
   .onError(({ error, code, set }) => {
     if (error instanceof ZodError) {
       set.status = 400;
