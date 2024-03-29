@@ -6,6 +6,7 @@ import { type BunSQLiteDatabase, drizzle } from "drizzle-orm/bun-sqlite";
 import { migrate } from "drizzle-orm/bun-sqlite/migrator";
 import app from "../app";
 import * as schema from "../db/schema";
+import { omitUndefinedValues } from "../helpers";
 import {
   USGReportFactory,
   doctorFactory,
@@ -553,6 +554,69 @@ describe("USGReport tests", () => {
       expect(resp.status).toBe(200);
     }
   });
+
+  it.each([
+    [new Date(2024, 0, 5), null],
+    [null, new Date(2024, 0, 3)],
+    [new Date(2024, 0, 5), new Date(2024, 0, 3)],
+  ])(
+    "Should filter USGReports by date between %p and %p",
+    async (before, after) => {
+      const USGReports = await Promise.all([
+        USGReportFactory(db, { date: new Date(2024, 0, 1) }),
+        USGReportFactory(db, { date: new Date(2024, 0, 2) }),
+        USGReportFactory(db, { date: new Date(2024, 0, 3) }),
+        USGReportFactory(db, { date: new Date(2024, 0, 4) }),
+        USGReportFactory(db, { date: new Date(2024, 0, 5) }),
+        USGReportFactory(db, { date: new Date(2024, 0, 6) }),
+      ]);
+
+      const expectedUSGReports = USGReports.filter((USGReport) => {
+        if (before && after) {
+          return USGReport.date <= before && USGReport.date >= after;
+        }
+        if (before) {
+          return USGReport.date <= before;
+        }
+        if (after) {
+          return USGReport.date >= after;
+        }
+        return true;
+      });
+
+      const [response, data] = await fireRequest(app, "/usg-report", {
+        method: "GET",
+        query: omitUndefinedValues({
+          date_before: before?.toISOString(),
+          date_after: after?.toISOString(),
+        }),
+        authUserId: user.id,
+      });
+
+      expect(response.status).toBe(200);
+      expect(data.data.length).toBe(expectedUSGReports.length);
+      for (const USGReportReceived of data.data) {
+        const expectedUSGReport = USGReports.find(
+          (u) => u.id === USGReportReceived.id,
+        );
+        if (!expectedUSGReport) {
+          throw new Error("USGReport not found");
+        }
+
+        expect(USGReportReceived.id).toBe(expectedUSGReport.id);
+        expect(USGReportReceived.partOfScan).toBe(expectedUSGReport.partOfScan);
+        expect(USGReportReceived.findings).toBe(expectedUSGReport.findings);
+        expect(USGReportReceived.referrer.id).toBe(
+          expectedUSGReport.referrerId,
+        );
+        expect(USGReportReceived.patient.id).toBe(expectedUSGReport.patientId);
+        expect(USGReportReceived.date).toBe(
+          expectedUSGReport.date.toISOString(),
+        );
+        expect(USGReportReceived.deleted).toBeUndefined();
+      }
+    },
+  );
 
   it("Should not list all USGReports if unauthorized", async () => {
     await Promise.all(
