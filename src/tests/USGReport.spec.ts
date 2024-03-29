@@ -496,40 +496,62 @@ describe("USGReport tests", () => {
   });
 
   it("Should list all non deleted USGReports", async () => {
-    const USGReports = await Promise.all(
-      Array.from({ length: 10 }).map(() =>
-        USGReportFactory(db, {
-          deleted: faker.datatype.boolean({ probability: 0.75 }),
-        }),
-      ),
-    );
+    const notDeletedUSGReports = (
+      await Promise.all(
+        Array.from({ length: faker.number.int({ min: 100, max: 200 }) }).map(
+          () => USGReportFactory(db),
+        ),
+      )
+    ).toSorted((a, b) => b.id - a.id);
 
-    const notDeletedUSGReports = USGReports.filter(
-      (USGReport) => !USGReport.deleted,
+    await Promise.all(
+      Array.from({ length: faker.number.int({ min: 100, max: 200 }) }).map(() =>
+        USGReportFactory(db, { deleted: true }),
+      ),
     );
 
     const notDeletedUSGReportsCount = notDeletedUSGReports.length;
 
-    const [response, responseData] = await fireRequest(app, "/usg-report", {
-      method: "GET",
-      authUserId: user.id,
-    });
+    const pageSize = faker.number.int({ min: 10, max: 30 });
 
-    const { data } = responseData;
+    const totalPages = Math.ceil(notDeletedUSGReportsCount / pageSize);
 
-    expect(response.status).toBe(200);
-    expect(data.length).toBe(notDeletedUSGReportsCount);
-    notDeletedUSGReports.map((USGReport) => {
-      const USGReportInResponse = data.find((p: any) => p.id === USGReport.id);
+    const responseArray = await Promise.all(
+      Array.from({ length: totalPages }).map((_, i) =>
+        fireRequest(app, `/usg-report?page=${i + 1}&limit=${pageSize}`, {
+          authUserId: user.id,
+        }),
+      ),
+    );
 
-      expect(USGReportInResponse).toBeDefined();
-      expect(USGReportInResponse.patient.id).toBe(USGReport.patientId);
-      expect(USGReportInResponse.referrer.id).toBe(USGReport.referrerId);
-      expect(USGReportInResponse.partOfScan).toBe(USGReport.partOfScan);
-      expect(USGReportInResponse.findings).toBe(USGReport.findings);
-      expect(USGReportInResponse.date).toEqual(USGReport.date.toISOString());
-      expect(USGReportInResponse.deleted).toBeUndefined();
-    });
+    for (const [pageNumber, response] of responseArray.entries()) {
+      const [resp, respData] = response;
+
+      expect(respData.hasMore).toBe(pageNumber < totalPages - 1);
+      expect(respData.page).toBe(pageNumber + 1);
+      expect(respData.limit).toBe(pageSize);
+      expect(respData.totalPages).toBe(totalPages);
+      expect(respData.total).toBe(notDeletedUSGReportsCount);
+      if (pageNumber === responseArray.length - 1) {
+        expect(respData.data.length).toBe(
+          notDeletedUSGReportsCount % pageSize || pageSize,
+        );
+      }
+
+      for (const [j, USGReport] of respData.data.entries()) {
+        const expectedUSGReport =
+          notDeletedUSGReports[pageSize * pageNumber + j];
+
+        expect(USGReport.id).toBe(expectedUSGReport.id);
+        expect(USGReport.partOfScan).toBe(expectedUSGReport.partOfScan);
+        expect(USGReport.findings).toBe(expectedUSGReport.findings);
+        expect(USGReport.referrer.id).toBe(expectedUSGReport.referrerId);
+        expect(USGReport.patient.id).toBe(expectedUSGReport.patientId);
+        expect(USGReport.date).toBe(expectedUSGReport.date.toISOString());
+        expect(USGReport.deleted).toBeUndefined();
+      }
+      expect(resp.status).toBe(200);
+    }
   });
 
   it("Should not list all USGReports if unauthorized", async () => {

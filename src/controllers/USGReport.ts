@@ -100,7 +100,7 @@ const USGReportsController = new Elysia({ prefix: "/usg-report" })
 
             const USGReportList = await db.query.USGReports.findMany({
               where: filter,
-              orderBy: [desc(USGReports.createdAt)],
+              orderBy: [desc(USGReports.createdAt), desc(USGReports.id)],
               offset: (page - 1) * limit,
               limit: limit + 1,
               ...USGReportQueryFilters,
@@ -130,13 +130,13 @@ const USGReportsController = new Elysia({ prefix: "/usg-report" })
           {
             query: t.Optional(
               t.Object({
-                patient: t.Optional(t.Number()),
-                referrer: t.Optional(t.Number()),
+                patient: t.Optional(t.Numeric()),
+                referrer: t.Optional(t.Numeric()),
                 partOfScan: t.Optional(t.String()),
                 findings: t.Optional(t.String()),
                 date: t.Optional(t.String()),
-                limit: t.Optional(t.Number()),
-                page: t.Optional(t.Number()),
+                limit: t.Optional(t.Numeric()),
+                page: t.Optional(t.Numeric()),
               }),
             ),
           },
