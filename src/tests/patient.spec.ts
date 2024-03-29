@@ -575,7 +575,9 @@ describe("Patient tests", () => {
       expect(respData.totalPages).toBe(totalPages);
       expect(respData.total).toBe(notDeletedPatientsCount);
       if (pageNumber === responseArray.length - 1) {
-        expect(respData.data.length).toBe(notDeletedPatientsCount % pageSize);
+        expect(respData.data.length).toBe(
+          notDeletedPatientsCount % pageSize || pageSize,
+        );
       }
 
       for (const [j, patient] of respData.data.entries()) {
