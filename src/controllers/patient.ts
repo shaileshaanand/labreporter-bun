@@ -81,11 +81,11 @@ const patientsController = new Elysia({ prefix: "/patient" })
               where: filter,
               offset: (page - 1) * limit,
               limit: limit + 1,
-              orderBy: [desc(patients.createdAt)],
+              orderBy: [desc(patients.createdAt), desc(patients.id)],
             });
 
             const { total } = (
-              await db.select({ total: count() }).from(patients)
+              await db.select({ total: count() }).from(patients).where(filter)
             )[0];
 
             const totalPages = Math.ceil(total / limit);
@@ -112,8 +112,8 @@ const patientsController = new Elysia({ prefix: "/patient" })
                 name: t.Optional(t.String()),
                 email: t.Optional(t.String()),
                 query: t.Optional(t.String()),
-                limit: t.Optional(t.Number()),
-                page: t.Optional(t.Number()),
+                limit: t.Optional(t.Numeric()),
+                page: t.Optional(t.Numeric()),
               }),
             ),
           },

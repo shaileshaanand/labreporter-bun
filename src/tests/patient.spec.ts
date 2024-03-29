@@ -539,37 +539,58 @@ describe("Patient tests", () => {
   });
 
   it("Should list all non deleted patients", async () => {
-    const patients = await Promise.all(
-      Array.from({ length: 10 }).map(() =>
-        patientFactory(db, {
-          deleted: faker.datatype.boolean({ probability: 0.75 }),
+    const notDeletedPatients = (
+      await Promise.all(
+        Array.from({ length: faker.number.int({ min: 100, max: 200 }) }).map(
+          () => patientFactory(db),
+        ),
+      )
+    ).toSorted((a, b) => b.id - a.id);
+
+    await Promise.all(
+      Array.from({ length: faker.number.int({ min: 100, max: 200 }) }).map(() =>
+        patientFactory(db, { deleted: true }),
+      ),
+    );
+
+    const notDeletedPatientsCount = notDeletedPatients.length;
+
+    const pageSize = faker.number.int({ min: 10, max: 30 });
+
+    const totalPages = Math.ceil(notDeletedPatientsCount / pageSize);
+
+    const responseArray = await Promise.all(
+      Array.from({ length: totalPages }).map((_, i) =>
+        fireRequest(app, `/patient?page=${i + 1}&limit=${pageSize}`, {
+          authUserId: user.id,
         }),
       ),
     );
 
-    const notDeletedPatients = patients.filter((patient) => !patient.deleted);
+    for (const [pageNumber, response] of responseArray.entries()) {
+      const [resp, respData] = response;
+      expect(respData.hasMore).toBe(pageNumber < totalPages - 1);
+      expect(respData.page).toBe(pageNumber + 1);
+      expect(respData.limit).toBe(pageSize);
+      expect(respData.totalPages).toBe(totalPages);
+      expect(respData.total).toBe(notDeletedPatientsCount);
+      if (pageNumber === responseArray.length - 1) {
+        expect(respData.data.length).toBe(notDeletedPatientsCount % pageSize);
+      }
 
-    const notDeletedPatientsCount = notDeletedPatients.length;
+      for (const [j, patient] of respData.data.entries()) {
+        const expectedPatient = notDeletedPatients[pageSize * pageNumber + j];
 
-    const [response, responseData] = await fireRequest(app, "/patient", {
-      authUserId: user.id,
-    });
-
-    const { data } = responseData;
-
-    expect(response.status).toBe(200);
-    expect(data.length).toBe(notDeletedPatientsCount);
-    notDeletedPatients.map((patient) => {
-      const patientInResponse = data.find((p: any) => p.id === patient.id);
-
-      expect(patientInResponse).toBeDefined();
-      expect(patientInResponse.name).toBe(patient.name);
-      expect(patientInResponse.phone).toBe(patient.phone);
-      expect(patientInResponse.email).toBe(patient.email);
-      expect(patientInResponse.age).toBe(patient.age);
-      expect(patientInResponse.gender).toBe(patient.gender);
-      expect(patientInResponse.deleted).toBeUndefined();
-    });
+        expect(patient.id).toBe(expectedPatient.id);
+        expect(patient.name).toBe(expectedPatient.name);
+        expect(patient.phone).toBe(expectedPatient.phone);
+        expect(patient.email).toBe(expectedPatient.email);
+        expect(patient.age).toBe(expectedPatient.age);
+        expect(patient.gender).toBe(expectedPatient.gender);
+        expect(patient.deleted).toBeUndefined();
+      }
+      expect(resp.status).toBe(200);
+    }
   });
 
   it("Should filter patients by name", async () => {
