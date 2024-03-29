@@ -41,7 +41,7 @@ const USGReportPayloadValidator = z
     referrerId: referrer,
   }));
 
-const USGReportsController = new Elysia({ prefix: "/USGReport" })
+const USGReportsController = new Elysia({ prefix: "/usg-report" })
   .use(context)
   .guard(
     {

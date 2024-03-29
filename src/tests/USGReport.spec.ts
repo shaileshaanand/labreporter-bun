@@ -48,7 +48,7 @@ describe("USGReport tests", () => {
       date: faker.date.recent({ days: 14 }),
     };
 
-    const [response, data] = await fireRequest(app, "/USGReport", {
+    const [response, data] = await fireRequest(app, "/usg-report", {
       method: "POST",
       body: USGReport,
       authUserId: user.id,
@@ -108,7 +108,7 @@ describe("USGReport tests", () => {
       date: faker.date.recent({ days: 14 }),
     };
 
-    const [response, data] = await fireRequest(app, "/USGReport", {
+    const [response, data] = await fireRequest(app, "/usg-report", {
       method: "POST",
       body: USGReport,
     });
@@ -155,7 +155,7 @@ describe("USGReport tests", () => {
 
     USGReport[field] = value;
 
-    const [response, data] = await fireRequest(app, "/USGReport", {
+    const [response, data] = await fireRequest(app, "/usg-report", {
       method: "POST",
       body: USGReport,
       authUserId: user.id,
@@ -171,7 +171,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
       {
         method: "GET",
         authUserId: user.id,
@@ -224,7 +224,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
     );
 
     expect(response.status).toBe(401);
@@ -237,7 +237,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id + 1}`,
+      `/usg-report/${USGReport.id + 1}`,
       {
         method: "GET",
         authUserId: user.id,
@@ -254,7 +254,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
       {
         method: "GET",
         authUserId: user.id,
@@ -279,7 +279,7 @@ describe("USGReport tests", () => {
     };
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
       {
         method: "PUT",
         body: USGReportUpdate,
@@ -336,7 +336,7 @@ describe("USGReport tests", () => {
     };
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id + 1}`,
+      `/usg-report/${USGReport.id + 1}`,
       {
         method: "PUT",
         body: USGReportUpdate,
@@ -362,7 +362,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
       {
         method: "PUT",
         body: USGReportUpdate,
@@ -377,7 +377,7 @@ describe("USGReport tests", () => {
   it("Should delete a USGReport", async () => {
     const USGReport = await USGReportFactory(db);
 
-    const [response] = await fireRequest(app, `/USGReport/${USGReport.id}`, {
+    const [response] = await fireRequest(app, `/usg-report/${USGReport.id}`, {
       method: "DELETE",
       authUserId: user.id,
     });
@@ -405,7 +405,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
       {
         method: "DELETE",
       },
@@ -436,7 +436,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id + 1}`,
+      `/usg-report/${USGReport.id + 1}`,
       {
         method: "DELETE",
         authUserId: user.id,
@@ -468,7 +468,7 @@ describe("USGReport tests", () => {
 
     const [response, data] = await fireRequest(
       app,
-      `/USGReport/${USGReport.id}`,
+      `/usg-report/${USGReport.id}`,
       {
         method: "DELETE",
         authUserId: user.id,
@@ -510,7 +510,7 @@ describe("USGReport tests", () => {
 
     const notDeletedUSGReportsCount = notDeletedUSGReports.length;
 
-    const [response, responseData] = await fireRequest(app, "/USGReport", {
+    const [response, responseData] = await fireRequest(app, "/usg-report", {
       method: "GET",
       authUserId: user.id,
     });
@@ -537,7 +537,7 @@ describe("USGReport tests", () => {
       Array.from({ length: 10 }).map(() => USGReportFactory(db)),
     );
 
-    const [response, data] = await fireRequest(app, "/USGReport", {
+    const [response, data] = await fireRequest(app, "/usg-report", {
       method: "GET",
     });
 
