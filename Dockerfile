@@ -1,4 +1,4 @@
-FROM oven/bun:alpine
+FROM oven/bun:1.1-alpine
 
 RUN apk add dumb-init --no-cache
 
